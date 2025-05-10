@@ -1,0 +1,36 @@
+{% extends 'my_budget/base.html' %}
+{% block title %}Отчёт о бюджете{% endblock %}
+
+{% block content %}
+<div class="summary-container">
+  {# Заголовок с форматированием месяца в формате 01.2024 #}
+  <h1>Отчёт за {{ summary.month|stringformat:"02d" }}.{{ summary.year }}</h1>
+  
+  {# Контейнер для карточек с финансовыми показателями #}
+  <div class="summary-cards">
+    <!-- Карточка доходов -->
+    <div class="card">
+      <h3>Доходы</h3>
+      {# Отображение суммы с двумя знаками после запятой и стилем для доходов #}
+      <p class="amount income">{{ summary.income|floatformat:2 }} Р</p>
+    </div>
+
+    <!-- Карточка расходов -->
+    <div class="card">
+      <h3>Расходы</h3>
+      {# Отображение суммы с двумя знаками после запятой и стилем для расходов #}
+      <p class="amount expense">{{ summary.expense|floatformat:2 }} Р</p>
+    </div>
+
+    <!-- Карточка баланса с динамическим стилем -->
+    <div class="card">
+      <h3>Баланс</h3>
+      <!-- Условные классы: ositive (зеленый) при положительном балансе,
+      negative (красный) при отрицательном. Форматирование до 2 знаков.-->
+      <p class="amount {% if summary.balance > 0 %}positive{% else %}negative{% endif %}">
+        {{ summary.balance|floatformat:2 }} Р
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

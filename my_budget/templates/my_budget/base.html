@@ -1,0 +1,170 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Бюджет{% endblock %}</title>
+  <!-- Подключение статических файлов -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="icon" href="{% static 'img/budget.png' %}">
+  <script src="{% static 'js/chart.js' %}"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+</head>
+<body>
+  <!-- Навигационное меню с подсветкой активного пункта -->
+  <nav class="main-nav">
+  <ul>
+    <!-- Динамическое определение активной страницы через сравнение URL -->
+    <li class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+      <a href="{% url 'my_budget:home' %}">Главная</a>
+    </li>
+    <li class="{% if request.resolver_match.url_name == 'income' %}active{% endif %}">
+      <a href="{% url 'my_budget:income' %}">Доходы</a>
+    </li>
+    <li class="{% if request.resolver_match.url_name == 'expense' %}active{% endif %}">
+      <a href="{% url 'my_budget:expense' %}">Расходы</a>
+    </li>
+    <li class="{% if request.resolver_match.url_name == 'summary' %}active{% endif %}">
+      <a href="{% url 'my_budget:summary' %}">Сводка</a>
+    </li>
+    <!-- Ссылка в админку открывается в новой вкладке -->
+    <li class="admin-link">
+      <a href="{% url 'admin:index' %}" target="_blank">В Админку</a>
+    </li>
+  </ul>
+</nav>
+
+
+  <!-- Контейнер для карточек с текущей статистикой -->
+  <div class="container">
+    {% block content %}
+    <div class="dashboard">
+    <!-- Карточки с текущей статистикой -->
+    <div class="summary-cards">
+
+    <!-- Карточка доходов -->
+    <div class="card">
+      <h3>Доходы</h3>
+      <p>{{ current_summary.income }} Р</p>
+    </div>
+
+    <!-- Карточка расходов -->
+    <div class="card">
+        <h3>Расходы</h3>
+      <p>{{ current_summary.expense }} Р</p>
+    </div>
+
+
+    <!-- Карточка баланса с цветовой индикацией -->
+    <div class="card">
+      <h3>Баланс</h3>
+      <p class="{% if current_summary.balance > 0 %}positive{% else %}negative{% endif %}">
+          {{ current_summary.balance }} Р
+      </p>
+    </div>
+  </div>
+
+
+
+  <!-- Контейнер для графика с цветной индикацией -->
+  <div class="chart-container">
+     <canvas id="trendChart"></canvas>
+  </div>
+
+
+<!-- Передача данных для графика в безопасном JSON-формате -->
+{{ chart_labels|json_script:"chart-labels" }}
+{{ income_data|json_script:"income-data" }}
+{{ expense_data|json_script:"expense-data" }}
+
+
+<!-- Секция истории операций с анимацией -->
+<div class="history-section">
+  <button class="toggle-history" onclick="toggleHistory()">
+    <span class="arrow">▶</span> История операций
+  </button>
+  <div class="history-list" style="display: none;">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Месяц</th>
+          <th>Доходы</th>
+          <th>Расходы</th>
+          <th>Баланс</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for month in history %}
+        <tr>
+          <td>{{ month.month }}/{{ month.year }}</td>
+          <td>{{ month.income }}</td>
+          <td>{{ month.expense }}</td>
+          <td class="{% if month.balance > 0 %}positive{% else %}negative{% endif %}">
+            {{ month.balance }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Инициализация графика с использованием Chart.js
+  const ctx = document.getElementById('trendChart').getContext('2d');
+
+  // Получение данных из Django-контекста через JSON
+  const chartLabels = JSON.parse(document.getElementById('chart-labels').textContent);
+  const incomeData = JSON.parse(document.getElementById('income-data').textContent);
+  const expenseData = JSON.parse(document.getElementById('expense-data').textContent);
+
+  // Создание линейного графика с двумя наборами данных
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [
+        {
+          label: 'Доходы',
+          data: incomeData,
+          borderColor: '#4CAF50', // Зеленый цвет для доходов
+          tension: 0.1 // Сглаживание линий
+        },
+        {
+          label: 'Расходы',
+          data: expenseData,
+          borderColor: '#F44336', // Красный цвет для расходов
+          tension: 0.1 // Сглаживание линий
+        }
+      ]
+    }
+  });
+
+  // Переключение видимости истории операций
+  function toggleHistory() {
+    const historyList = document.querySelector('.history-list');
+    historyList.style.display = historyList.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // Подсветка активного пункта меню при загрузке страницы
+  document.addEventListener('DOMContentLoaded', function() {
+  const currentPath = window.location.pathname;
+  console.log('Текущий путь:', currentPath); // Отладка
+
+  document.querySelectorAll('.main-nav a').forEach(link => {
+    console.log('Проверяем ссылку:', link.getAttribute('href')); // Отладка
+    
+    if (link.getAttribute('href') === currentPath) {
+      console.log('Совпадение!'); // Отладка
+      link.parentElement.classList.add('active');
+    }
+  });
+});
+</script>
+     {% endblock %}
+
+    <!-- Подключение основного скрипта -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

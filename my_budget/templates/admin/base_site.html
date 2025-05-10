@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+
+{% block extrahead %}
+    {{ block.super }} {# Сохраняем оригинальное содержимое блока из родительского шаблона #}
+
+    {# Подключение favicon для админ-панели #}
+    <!-- Стандартная иконка для большинства браузеров -->
+    <link rel="shortcut icon" href="{% static 'img/budget.png' %}">
+
+    {# Современные форматы иконок #}
+    <!-- PNG-версия иконки -->
+    <link rel="icon" href="{% static 'img/budget.png' %}" type="image/png">
+
+    {# Резервный вариант для локального окружения #}
+    <!-- Прямая ссылка для разработки (заменить на production URL!) -->
+    <link rel="icon" href="http://127.0.0.1:8000/static/img/budget.png">
+{% endblock %}

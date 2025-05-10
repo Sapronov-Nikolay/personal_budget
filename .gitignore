@@ -1,0 +1,32 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+
+
+# Virtual Environment
+venv/
+env/
+
+# IDE
+.vscode/       # Конфиги VS Code (ещё не созданы, но лучше добавить)
+.idea/         # Конфиги PyCharm (на будущее)
+
+# PostgreSQL
+/postgres_data/  # Папка с данными PostgreSQL (исключить)
+*.bak            # Резервные копии БД
+
+# Node.js
+node_modules/  # Зависимости npm (если используете)
+
+# Секретные файлы
+secretkey.py   # Ключ Django
+.env           # Переменные окружения
+.DS_Store      # Системные файлы macOS
+
+# Прочее
+*.sql          # Исключить все SQL-файлы, кроме backup.sql
+!backup.sql    # Разрешить только backup.sql

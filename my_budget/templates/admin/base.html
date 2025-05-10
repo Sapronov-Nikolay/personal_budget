@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {# Кастомизация иконки и стилей админ-панели #}
+  
+  <!-- Подключение кастомной иконки сайта -->
+  <link rel="icon" href="{% static 'img/budget.png' %}" type="image/x-icon">
+
+  {# Стили для кастомизации внешнего вида админки #}
+  <style>
+    /* Основной цвет заголовка админ-панели */
+    #header { background: #005BFF; }
+    /* Стили для заголовков блоков и таблиц */
+    .module h2,
+    .module caption { background: #e6f0ff; /* Светло-голубой фон для визуального разделения */
+    }
+  </style>
+{% endblock %}

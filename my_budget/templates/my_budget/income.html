@@ -1,0 +1,219 @@
+{% extends 'my_budget/base.html' %}
+{% block title %}Доходы{% endblock %}
+{# Временное сообщение о состоянии категорий (может отображаться в других частях шаблона) #}
+<h3>{{ category_message }}</h3>
+
+{% block content %}
+<div class="income-page">
+  <h1>Управление доходами</h1>
+
+  {# Секция управления категориями с сортировкой #}
+  <div class="category-table">
+    <h3>Категории доходов</h3>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th> {# Сортировка по названию с индикатором направления #}
+            <a href="?sort=name&order={% if order == 'asc' and sort == 'name' %}desc{% else %}asc{% endif %}" class="sort-link">
+              Название
+              <span class="sort-arrow">
+                {% if sort == 'name' %}
+                  {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+              </span>
+            </a>
+          <th>  {# Сортировка по дате создания категории #}
+            <a href="?sort=date&order={% if order == 'asc' and sort == 'date' %}desc{% else %}asc{% endif %}" class="sort-link">
+              Дата создания
+              <span class="sort-arrow">
+                {% if sort == 'date' %}
+                  {% if order == 'asc' %}▲{% else %}▼{% endif %}
+                {% endif %}
+              </span>
+            </a>
+          </th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# Вывод списка категорий с кнопками удаления #}
+        {% for category in categories %}
+        <tr>
+          <td>{{ category.name }}</td>
+          <td>{{ category.created_at|date:"d.m.Y" }}</td> <!-- Дата создания -->
+          <td>
+            <button class="btn-delete" onclick="deleteIncomeCategory({{ category.id }})">
+              Удалить
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {# Форма быстрого создания категорий без перезагрузки #}
+  <form id="createIncomeCategoryForm" method="post">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Новая категория" required>
+    <button type="submit" class="btn-create">+ Добавить</button>
+  </form>
+  </div>
+
+  {# Форма добавления доходов с валидацией #}
+  <div class="income-form-table">
+    <h3>Доходы за {{ current_month|stringformat:"02d" }}.{{ current_year }}</h3>
+    <form id="addIncomeForm" method="post">
+      {% csrf_token %}
+      <table class="styled-form">
+        <tr>
+          <td><label>Категория:</label></td>
+          <td>
+            {# Динамический список категорий из БД #}
+            <select name="category" required>
+              {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td><label>Сумма:</label></td>
+          <td>
+            <input type="number" name="amount" step="0.01" required> {# Валидация формата #}
+            <div class="hint">Пример: 1500.00</div> {# Подсказка для пользователя #}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button type="submit" class="btn-save">Сохранить запись</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </div>
+
+{# Блок фильтрации по периоду #}
+<div class="month-picker">
+  <h3>Выбор периода через выпадающие списки:</h3>
+  <form method="GET" class="month-picker">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="order" value="{{ order }}">
+    <select name="month" class="form-select">
+      {% for m in months_range %}
+        <option value="{{ m }}" {% if m == current_month %}selected{% endif %}>
+          {{ m|stringformat:"02d" }} {# Форматирование месяца с ведущим нулем #}
+        </option>
+      {% endfor %}
+    </select>
+    <!-- Поле года -->
+    <input type="number" name="year" value="{{ current_year }}" min="2000" max="2100" class="form-control">
+
+    <button type="submit" class="btn-filter">Показать</button>
+  </form>
+</div>
+
+  {# История операций с доходами #}
+  <div class="income-list">
+    <h2>История доходов</h2>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Категория</th>
+          <th>Сумма</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for income in incomes %}
+        <tr>
+          <td>{{ income.date|date:"d.m.Y" }}</td> {# Форматирование даты операции #}
+          <td>{{ income.category }}</td>
+          <td>{{ income.amount|floatformat:2 }} Р</td> {# Форматирование суммы #}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="3">Нет записей о доходах</td> {# Сообщение при пустом списке #}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+    // AJAX для создания категории дохода
+    document.getElementById('createIncomeCategoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch("{% url 'my_budget:create_income_category' %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' } // CSRF-защита
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') window.location.reload(); // Обновление при успехе
+            else alert('Ошибка: ' + JSON.stringify(data.errors)); // Обработка ошибок
+        });
+    });
+
+    // Удаление категории с подтверждением
+    function deleteIncomeCategory(id) {
+    if (confirm('Удалить категорию?')) {
+        const params = new URLSearchParams(window.location.search);
+        
+        fetch(`/budget/income-category/delete/${id}/?${params.toString()}`, {
+            method: 'POST',
+            headers: { 
+                'X-CSRFToken': '{{ csrf_token }}', // CSRF-защита
+                'Content-Type': 'application/json'
+            }
+          }).then(() => window.location.reload());  // Принудительное обновление
+        }
+      }
+
+    // AJAX для добавления дохода
+    document.getElementById('addIncomeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch("{% url 'my_budget:create_income' %}", {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' } // CSRF-защита
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') window.location.reload(); // Обновление при успехе
+            else alert('Ошибка: ' + JSON.stringify(data.errors)); // Обработка ошибок
+        });
+    });
+
+    // Удаление записи дохода
+    function deleteIncome(id) {
+        if (confirm('Удалить доход?')) {
+            fetch(`/budget/income/delete/${id}/`, {  // Правильный URL
+                method: 'POST',
+                headers: { 
+                    'X-CSRFToken': '{{ csrf_token }}', // CSRF-защита
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload(); // Обновление при успехе
+                }
+            });
+        }
+    }
+
+    // Обработка сортировки таблицы
+    document.querySelectorAll('.sort-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault(); // Важно! Блокировка стандартного поведения
+        const newParams = link.getAttribute('href').split('?')[1];
+        window.location.search = newParams; // Обновление параметров URL
+      });
+    });
+  </script>
+</div>
+{% endblock %}

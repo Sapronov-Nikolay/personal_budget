@@ -1,0 +1,27 @@
+{% block content %}
+  {{ block.super }} {# Сохраняем оригинальное содержимое блока #}
+
+  {# Кастомный JavaScript для улучшения UX в админке #}
+  <script>
+    // Динамическое обновление текста через JS (не нужно городить код в админке)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Элементы интерфейса
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]'); // Все чекбоксы таблицы
+      const deleteButton = document.querySelector('button[name="delete_selected"]'); // Кнопка удаления
+      
+      // Обработчик изменения состояния чекбоксов
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          // Подсчет выбранных элементов
+          const selected = document.querySelectorAll('input:checked').length;
+
+          {# 
+            Динамическое обновление текста кнопки с учетом русской локализации.
+            Функция pluralize должна быть определена в глобальной области видимости
+          #}
+          deleteButton.textContent = `Удалить ${selected} ${pluralize(selected, 'сводка')}`;
+        });
+      });
+    });
+  </script>
+{% endblock %}
