@@ -36,6 +36,20 @@
   (Для Windows):
     venv\Scripts\activate
 
+  Если при запуске терминала оказались в другой среде Например SapronovCompany:
+    1. (SapronovCompany) I:\Mi docum\Personal_Budget>
+        (SapronovCompany) I:\Mi docum\Personal_Budget>deactivate    # Введите: deactivate
+
+    2. I:\Mi docum\Personal_Budget>
+        I:\Mi docum\Personal_Budget>cd budget   # Перейдите при помощи cd в папку проекта где лежит папка со средой и manage.py
+
+    3. I:\Mi docum\Personal_Budget\budget>
+        I:\Mi docum\Personal_Budget\budget>.\venv\Scripts\activate    # Введите: activate
+
+    4. (venv) I:\Mi docum\Personal_Budget\budget>
+        (venv) I:\Mi docum\Personal_Budget\budget>python manage.py runserver    # Далее запустите проект командой python manage.py runserver или работайте с другими командами.
+
+
   Если нужно обновить pip, то:
     python -m pip install --upgrade pip
 
