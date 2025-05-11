@@ -2,23 +2,23 @@
 ==================================================================
 Построен на postgresql версии 17.4
 ==================================================================
-# Сменить кодировку консоли
-chcp 1251
+Сменить кодировку консоли
+  chcp 1251
 
-# Создана резервная копия БД (backup.sql):
+Создана резервная копия БД (backup.sql):
   pg_dump -U budgetbooss -d personal_budget -F p -b -v --encoding=UTF8 > backup.sql
   Пояснения по этой команде:
     -U budgetbooss — ваш пользователь PostgreSQL.
     -d personal_budget — имя базы данных.
     --encoding=UTF8 — избегает проблем с кодировкой.
 
-# Восстановление данные из резервной копии:
+Восстановление данные из резервной копии:
   psql -U budgetbooss -d personal_budget -f backup.sql
 
-# Пересоздать БД (если нужно):
+Пересоздать БД (если нужно):
   dropdb -U budgetbooss personal_budget && createdb -U budgetbooss personal_budget
 
-# Выйти из psql
+Выйти из psql
   \q
 
                 Важно!!!
@@ -31,10 +31,10 @@ chcp 1251
   Нужно быть в среде, где venv - это имя среды. Имя среды может быть другим, взависимости от того как её назвали при создании.
 
   (Для Linux/MacOS):
-  source venv/bin/activate
+    source venv/bin/activate
 
   (Для Windows):
-  venv\Scripts\activate
+    venv\Scripts\activate
 
   Если нужно обновить pip, то:
     python -m pip install --upgrade pip
@@ -58,11 +58,11 @@ chcp 1251
     pip uninstall -r requirements.txt -y
 
 Если вы используете pipenv или poetry, то:
-Для pipenv:
-  pipenv update
+  Для pipenv:
+    pipenv update
 
-Для poetry:
-  poetry update
+  Для poetry:
+    poetry update
 ==================================================================
 Пример структуры проекта при подготовке к загрузки в GitHub
 budget/
@@ -97,12 +97,12 @@ budget/
     git push -u origin main    # Запушить изменения
   Если надо создать ветку:
     Создайте первый коммит:
-    git add .
-    git commit -m "Initial commit"  # Нужно делать с сообщением, заключив его в кавычки если внём есть спецсимволы или пробелы ""
+      git add .
+      git commit -m "Initial commit"  # Нужно делать с сообщением, заключив его в кавычки если внём есть спецсимволы или пробелы ""
     Создайте саму ветку, например main:
-    git branch -M main # или master
+      git branch -M main # или master
     Затем вести команду с новым именем:
-    git push -u origin main # или master
+      git push -u origin main # или master
   Если возникает конфликт ветки:
     git pull origin main --allow-unrelated-histories
     git push -u origin main # Или master если имя ветки master. Или иное имя.
