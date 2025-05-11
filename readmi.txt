@@ -44,7 +44,7 @@
         I:\Mi docum\Personal_Budget>cd budget   # Перейдите при помощи cd в папку проекта где лежит папка со средой и manage.py
 
     3. I:\Mi docum\Personal_Budget\budget>
-        I:\Mi docum\Personal_Budget\budget>.\venv\Scripts\activate    # Введите: activate
+        I:\Mi docum\Personal_Budget\budget>.\venv\Scripts\activate    # Введите: .\venv\Scripts\activate
 
     4. (venv) I:\Mi docum\Personal_Budget\budget>
         (venv) I:\Mi docum\Personal_Budget\budget>python manage.py runserver    # Далее запустите проект командой python manage.py runserver или работайте с другими командами.
